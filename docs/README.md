@@ -18,7 +18,7 @@ Extracts `@smokeTests` annotations from Smithy models and turns them into execut
 
 ### With codegen'd services
 
-```scala
+```scala mdoc:compile-only
 import cats.effect.IO
 import example.widget._
 import smithy4s.tests.{SmokeTestRunner, SmokeTestResult}
@@ -39,7 +39,7 @@ tests.foreach { test =>
 
 ### With dynamically loaded models
 
-```scala
+```scala mdoc:compile-only
 import cats.effect.IO
 import smithy4s.{Service, ShapeId}
 import smithy4s.dynamic.DynamicSchemaIndex
@@ -90,7 +90,7 @@ def makeTests(httpClient: Client[IO], baseUri: Uri) = {
 
 The `SmokeTest[F]` type is framework-agnostic. Here's an example with weaver:
 
-```scala
+```scala mdoc:compile-only
 import cats.effect.IO
 import example.widget._
 import smithy4s.tests.{SmokeTestRunner, SmokeTestResult}

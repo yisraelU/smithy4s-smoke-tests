@@ -60,8 +60,21 @@ lazy val cli = (project in file("cli"))
   )
   .dependsOn(dynamic)
 
+lazy val docs = (project in file("docs-target"))
+  .enablePlugins(MdocPlugin)
+  .settings(
+    name := s"$projectPrefix-docs",
+    mdocIn := (ThisBuild / baseDirectory).value / "docs",
+    mdocOut := (ThisBuild / baseDirectory).value,
+    libraryDependencies ++= Seq(
+      Dependencies.Weaver.cats
+    ),
+    publish / skip := true
+  )
+  .dependsOn(example, cli)
+
 lazy val root = (project in file("."))
-  .aggregate(core, dynamic, example, cli)
+  .aggregate(core, dynamic, example, cli, docs)
   .settings(
     name := projectPrefix,
     publish / skip := true

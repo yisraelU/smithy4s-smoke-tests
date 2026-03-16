@@ -2,6 +2,7 @@
 target/
 project/target/
 project/project/
+docs-target/
 
 # IDE
 .idea/

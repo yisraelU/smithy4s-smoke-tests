@@ -28,10 +28,10 @@ object ModelLoader {
       index: DynamicSchemaIndex,
       serviceFilter: Option[String]
   ): List[DynamicSchemaIndex.ServiceWrapper] =
-    index.allServices.toList.filter { wrapper =>
+    index.allServices.toList.filter { serviceWrapper =>
       serviceFilter.forall { filter =>
-        wrapper.service.id.name.equalsIgnoreCase(filter) ||
-        wrapper.service.id.toString == filter
+        serviceWrapper.service.id.name.equalsIgnoreCase(filter) ||
+        serviceWrapper.service.id.toString == filter
       }
     }
 
