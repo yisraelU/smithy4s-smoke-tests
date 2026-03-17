@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  JABBA_INDEX: "https://github.com/typelevel/jdk-index/raw/main/index.json"
+
 jobs:
   build:
     runs-on: ubuntu-latest
