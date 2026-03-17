@@ -14,6 +14,45 @@ Extracts `@smokeTests` annotations from Smithy models and turns them into execut
 | **cli** | Command-line tool for running smoke tests from Smithy files |
 | **example** | Demo specs using weaver-test |
 
+## Example Smithy model
+
+```
+$version: "2.0"
+namespace com.example
+
+use smithy.test#smokeTests
+use alloy#simpleRestJson
+
+@simpleRestJson
+service WidgetService {
+    operations: [GetWidget]
+}
+
+@smokeTests([
+    {
+        id: "GetWidgetSuccess"
+        params: { id: "widget-1" }
+        expect: { success: {} }
+    },
+    {
+        id: "GetWidgetNotFound"
+        params: { id: "does-not-exist" }
+        expect: { failure: { errorId: WidgetNotFoundError } }
+    }
+])
+@http(method: "GET", uri: "/widgets/{id}")
+@readonly
+operation GetWidget {
+    input := { @required @httpLabel id: String }
+    output := { @required id: String, @required name: String }
+    errors: [WidgetNotFoundError]
+}
+
+@error("client")
+@httpError(404)
+structure WidgetNotFoundError { @required message: String }
+```
+
 ## Library Usage
 
 ### With codegen'd services
@@ -26,7 +65,10 @@ import smithy4s.tests.{SmokeTestRunner, SmokeTestResult}
 // Given a smithy4s service and implementation:
 val impl: WidgetService[IO] = new WidgetService[IO] {
   def getWidget(id: String): IO[GetWidgetOutput] =
-    IO.pure(GetWidgetOutput(id = id, name = s"Widget $id"))
+    if (id == "does-not-exist")
+      IO.raiseError(WidgetNotFoundError(s"Widget $id not found"))
+    else
+      IO.pure(GetWidgetOutput(id = id, name = s"Widget $id"))
 }
 
 val tests = SmokeTestRunner.tests(WidgetService, impl)
@@ -55,9 +97,17 @@ val model = Model.assembler()
   .addUnparsedModel("example.smithy",
     """$version: "2.0"
       |namespace com.example
+      |use smithy.test#smokeTests
       |use alloy#simpleRestJson
       |@simpleRestJson
       |service MyService { operations: [MyOp] }
+      |@smokeTests([
+      |    {
+      |        id: "MyOpSuccess"
+      |        params: {}
+      |        expect: { success: {} }
+      |    }
+      |])
       |@http(method: "GET", uri: "/test", code: 200)
       |@readonly
       |operation MyOp { output := { msg: String } }
@@ -99,7 +149,10 @@ import weaver.SimpleIOSuite
 object MySmokeSpec extends SimpleIOSuite {
   val impl: WidgetService[IO] = new WidgetService[IO] {
     def getWidget(id: String): IO[GetWidgetOutput] =
-      IO.pure(GetWidgetOutput(id = id, name = s"Widget $id"))
+      if (id == "does-not-exist")
+        IO.raiseError(WidgetNotFoundError(s"Widget $id not found"))
+      else
+        IO.pure(GetWidgetOutput(id = id, name = s"Widget $id"))
   }
 
   val tests = SmokeTestRunner.tests(WidgetService, impl)
@@ -172,45 +225,6 @@ Both subcommands accept:
 ```
 
 If neither `--file` nor `--jar` is provided, the model is read from stdin.
-
-### Example Smithy model
-
-```
-$version: "2.0"
-namespace com.example
-
-use smithy.test#smokeTests
-use alloy#simpleRestJson
-
-@simpleRestJson
-service WidgetService {
-    operations: [GetWidget]
-}
-
-@smokeTests([
-    {
-        id: "GetWidgetSuccess"
-        params: { id: "widget-1" }
-        expect: { success: {} }
-    },
-    {
-        id: "GetWidgetNotFound"
-        params: { id: "does-not-exist" }
-        expect: { failure: { errorId: WidgetNotFoundError } }
-    }
-])
-@http(method: "GET", uri: "/widgets/{id}")
-@readonly
-operation GetWidget {
-    input := { @required @httpLabel id: String }
-    output := { @required id: String, @required name: String }
-    errors: [WidgetNotFoundError]
-}
-
-@error("client")
-@httpError(404)
-structure WidgetNotFoundError { @required message: String }
-```
 
 ## Building
 
