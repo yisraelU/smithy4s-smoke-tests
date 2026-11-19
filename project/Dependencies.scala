@@ -7,7 +7,7 @@ object Dependencies {
     val smithy4s: String   = S4sBuildInfo.version
     val smithy: String     = S4sBuildInfo.smithyVersion
     val alloy: String      = S4sBuildInfo.alloyVersion
-    val http4s     = "0.23.33"
+    val http4s     = "0.23.39"
     val catsEffect = "3.7.0"
     val weaver     = "0.8.4"
     val decline    = "2.6.0"
